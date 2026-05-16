@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor & Partner Matching System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1a1a1a;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --accent-cyan: #00D4FF;
+            --accent-teal: #008080;
+            --border-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .subtitle {
+            color: var(--accent-cyan);
+            font-weight: 300;
+            font-size: 1.1rem;
+        }
+
+        .form-section,
+        .results-section {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #242424;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        button {
+            background-color: var(--accent-cyan);
+            color: #000;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            width: 100%;
+            font-size: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:hover {
+            background-color: #00b8e6;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            display: none;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #000;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .results-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background-color: #242424;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-cyan);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .card-role {
+            color: var(--accent-cyan);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.2rem;
+        }
+
+        .similarity-score {
+            background-color: rgba(0, 212, 255, 0.1);
+            color: var(--accent-cyan);
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background-color: #333333;
+            color: #ddd;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-action {
+            text-align: right;
+        }
+
+        .card-action button {
+            width: auto;
+            background-color: transparent;
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+        }
+
+        .card-action button:hover {
+            background-color: rgba(0, 212, 255, 0.1);
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-tester {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .user-tester input {
+            width: 200px;
+            padding: 0.5rem;
+        }
+
+        .user-tester button {
+            width: auto;
+            padding: 0.5rem 1rem;
+            margin: 0;
+        }
+
+        .notification-center {
+            position: relative;
+        }
+
+        .bell-icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .bell-icon:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: #ff5252;
+            color: white;
+            border-radius: 50%;
+            padding: 0.15rem 0.4rem;
+            font-size: 0.7rem;
+            font-weight: bold;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .notifications-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 350px;
+            background-color: #242424;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            margin-top: 0.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notifications-dropdown.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+
+        .notification-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-startup {
+            font-weight: 600;
+            color: var(--accent-cyan);
+            margin-bottom: 0.2rem;
+        }
+
+        .notification-email {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            background-color: var(--bg-card);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: auto;
+        }
+
+        .modal-close:hover {
+            color: var(--text-main);
+            background: none;
+            transform: none;
+        }
+
+        .toast {
+            display: none;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--accent-teal);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-message {
+            color: #ff5252;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            .form-section,
+            .results-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="top-nav">
+            <div class="user-tester">
+                <input type="text" id="testUserId" placeholder="View as User (e.g. mentor_001)">
+                <button type="button" id="loginBtn" onclick="testLogin()">Login</button>
+            </div>
+            <div class="notification-center">
+                <div class="bell-icon" onclick="toggleNotifications()">
+                    🔔
+                    <span class="badge" id="notificationBadge" style="display: none;">0</span>
+                </div>
+                <div class="notifications-dropdown" id="notificationsDropdown">
+                    <div class="dropdown-header">Invitations</div>
+                    <div id="notificationsList">
+                        <div class="empty-state">You have no new invitations</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <header>
+            <h1>Venture Node</h1>
+            <h3>Mentor & Partner Matching System for Startups</h3>
+            <div class="subtitle">AI-Powered Matchmaking for Your Startup</div>
+        </header>
+
+        <div class="form-section">
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="startupName">Startup Name</label>
+                    <input type="text" id="startupName" required placeholder="Enter your startup name">
+                </div>
+
+                <div class="form-group">
+                    <label for="startupEmail">Contact Email</label>
+                    <input type="email" id="startupEmail" required placeholder="founder@startup.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Describe your startup and what you're looking for</label>
+                    <textarea id="description" required
+                        placeholder="We are building a fintech app and need a mentor with experience in payment gateways..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>I am looking for a:</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="searchType" value="mentor" checked>
+                            Mentor
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="searchType" value="partner">
+                            Tech Partner
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" id="searchBtn">
+                    <span id="btnText">Search Matches</span>
+                    <div class="spinner" id="btnSpinner"></div>
+                </button>
+                <div id="searchError" class="error-message"></div>
+            </form>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <h2 style="margin-bottom: 1rem;">Top Matches</h2>
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <!-- Invitation Modal -->
+    <div class="modal-overlay" id="inviteModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()" type="button">&times;</button>
+            <h2 style="margin-bottom: 1.5rem;">Send Invitation</h2>
+            <div class="form-group">
+                <label for="inviteMessage">Message for them</label>
+                <textarea id="inviteMessage" placeholder="Hi, I saw your profile and would love to connect..."
+                    required></textarea>
+            </div>
+            <button onclick="sendInvitation()" id="sendInviteBtn" type="button">
+                <span id="inviteBtnText">Send</span>
+                <div class="spinner" id="inviteSpinner"></div>
+            </button>
+            <div id="inviteError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast" id="successToast">
+        Invitation sent! They will receive an email notification.
+    </div>
+
+    <script>
+        let currentLoggedInUser = null;
+
+        async function testLogin() {
+            const userId = document.getElementById('testUserId').value.trim();
+            if (!userId) return;
+
+            currentLoggedInUser = userId;
+            document.getElementById('loginBtn').textContent = 'Logged In';
+            document.getElementById('loginBtn').style.backgroundColor = 'var(--accent-teal)';
+
+            await fetchNotifications();
+        }
+
+        async function fetchNotifications() {
+            if (!currentLoggedInUser) return;
+
+            try {
+                const response = await fetch(`/api/notifications/${currentLoggedInUser}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    updateNotificationUI(data.notifications || []);
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+        function updateNotificationUI(notifications) {
+            const badge = document.getElementById('notificationBadge');
+            const list = document.getElementById('notificationsList');
+
+            if (notifications.length > 0) {
+                badge.textContent = notifications.length;
+                badge.style.display = 'block';
+
+                list.innerHTML = notifications.map(notif => `
+                <div class="notification-item">
+                    <div class="notification-startup">${notif.startup_name}</div>
+                    <div class="notification-email">${notif.startup_email}</div>
+                    <div class="notification-message">${notif.message}</div>
+                </div>
+            `).join('');
+            } else {
+                badge.style.display = 'none';
+                list.innerHTML = '<div class="empty-state">You have no new invitations</div>';
+            }
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationsDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const center = document.querySelector('.notification-center');
+            if (center && !center.contains(e.target)) {
+                const dropdown = document.getElementById('notificationsDropdown');
+                if (dropdown) dropdown.classList.remove('active');
+            }
+        });
+
+        let currentSelectedMentorId = null;
+
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const description = document.getElementById('description').value;
+            const searchType = document.querySelector('input[name="searchType"]:checked').value;
+            const btnText = document.getElementById('btnText');
+            const spinner = document.getElementById('btnSpinner');
+            const errorDiv = document.getElementById('searchError');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('resultsContainer');
+
+            // Reset states
+            errorDiv.style.display = 'none';
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+            document.getElementById('searchBtn').disabled = true;
+            resultsSection.style.display = 'none';
+            resultsContainer.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ description, search_type: searchType })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to search matches');
+                }
+
+                if (data.matches && data.matches.length > 0) {
+                    data.matches.forEach(match => {
+                        const matchPercent = Math.round(match.similarity_score * 100);
+
+                        const tagsHtml = (match.expertise_tags || [])
+                            .map(tag => `<span class="tag">${tag}</span>`)
+                            .join('');
+
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${match.name}</div>
+                                <div class="card-role">${match.role}</div>
+                            </div>
+                            <div class="similarity-score">${matchPercent}% match</div>
+                        </div>
+                        <div class="tags">
+                            ${tagsHtml}
+                        </div>
+                        <div class="card-desc">
+                            ${match.description || 'No description provided.'}
+                        </div>
+                        <div class="card-action">
+                            <button type="button" onclick="openModal('${match.id}')">Send Invitation</button>
+                        </div>
+                    `;
+                        resultsContainer.appendChild(card);
+                    });
+                    resultsSection.style.display = 'block';
+                } else {
+                    resultsContainer.innerHTML = '<p style="color: var(--text-muted);">No matches found.</p>';
+                    resultsSection.style.display = 'block';
+                }
+
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                btnText.style.display = 'block';
+                spinner.style.display = 'none';
+                document.getElementById('searchBtn').disabled = false;
+            }
+        });
+
+        function openModal(mentorId) {
+            currentSelectedMentorId = mentorId;
+            document.getElementById('inviteModal').style.display = 'flex';
+            document.getElementById('inviteMessage').value = '';
+            document.getElementById('inviteError').style.display = 'none';
+        }
+
+        function closeModal() {
+            document.getElementById('inviteModal').style.display = 'none';
+            currentSelectedMentorId = null;
+        }
+
+        async function sendInvitation() {
+            const startupName = document.getElementById('startupName').value;
+            const startupEmail = document.getElementById('startupEmail').value;
+            const message = document.getElementById('inviteMessage').value;
+
+            if (!startupName || !startupEmail) {
+                const errorDiv = document.getElementById('inviteError');
+                errorDiv.textContent = 'Please make sure Startup Name and Email are filled out in the search form.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (!message) {
+                const errorDiv = document.getElementById('inviteError');
+                errorDiv.textContent = 'Please enter a message.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const btnText = document.getElementById('inviteBtnText');
+            const spinner = document.getElementById('inviteSpinner');
+            const errorDiv = document.getElementById('inviteError');
+            const btn = document.getElementById('sendInviteBtn');
+
+            errorDiv.style.display = 'none';
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/invite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        startup_name: startupName,
+                        startup_email: startupEmail,
+                        mentor_id: currentSelectedMentorId,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to send invitation');
+                }
+
+                closeModal();
+                showToast();
+
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                btnText.style.display = 'block';
+                spinner.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('successToast');
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                    toast.style.animation = 'fadeIn 0.3s ease';
+                }, 300);
+            }, 3000);
+        }
+
+        // Add CSS for fadeOut toast
+        const style = document.createElement('style');
+        style.innerHTML = `
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(10px); }
+        }
+    `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>
