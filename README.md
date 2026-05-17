@@ -79,12 +79,8 @@ startup-mentor-matching/
 │   ├── main.py
 │   ├── requirements.txt
 │   └── Dockerfile
-│
-├── frontend/
 │   ├── templates/
-│   │   └── dashboard.html
-│   └── static/
-│       └── style.css
+│   │   └── dashboard.htm
 │
 ├── scripts/
 │   ├── generate_embeddings.py
@@ -153,7 +149,6 @@ export GOOGLE_CLOUD_PROJECT=your-project-id
 
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 
-export SENDGRID_API_KEY=your-sendgrid-key
 ```
 
 ---
