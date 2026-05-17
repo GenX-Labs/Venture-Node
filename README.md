@@ -56,9 +56,6 @@ This allows Venture Node to understand **meaning and intent**, not just keywords
 - Google Firestore
 - Google Cloud Functions
 
-## Notifications
-- SendGrid API
-
 ---
 
 # ☁️ Google Cloud Services Used
